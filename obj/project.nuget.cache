@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "x7m+ulcMXyg=",
+  "success": true,
+  "projectFilePath": "D:\\test\\Book Reader\\Book Reader\\Book Reader\\Book Reader.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\pit\\.nuget\\packages\\bblanchon.pdfium.win32\\130.0.6721\\bblanchon.pdfium.win32.130.0.6721.nupkg.sha512",
+    "C:\\Users\\pit\\.nuget\\packages\\pdfiumviewer.net.wpf\\3.0.4\\pdfiumviewer.net.wpf.3.0.4.nupkg.sha512"
+  ],
+  "logs": []
+}

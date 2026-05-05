@@ -1,0 +1,506 @@
+<Window x:Class="Book_Reader.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:pdf="clr-namespace:PdfiumViewer;assembly=PdfiumViewer"
+        Title="Book Reader" Height="700" Width="1100"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource AppBackgroundBrush}"
+        PreviewKeyDown="Window_PreviewKeyDown"
+        Loaded="Window_Loaded">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="8,4"/>
+        </Style>
+
+        <Style x:Key="ToolbarButton" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource SurfaceHoverBrush}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource ButtonHoverBorderBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource BorderSubtleBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="IconButton" TargetType="Button" BasedOn="{StaticResource ToolbarButton}">
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="MinWidth" Value="36"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+
+        <Style x:Key="ViewModeButton" TargetType="ToggleButton">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource ButtonActiveBackgroundBrush}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource ButtonHoverBorderBrush}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SidebarMenuItem" TargetType="RadioButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="GroupName" Value="SidebarMenu"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource SurfaceHoverBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource ButtonActiveBackgroundBrush}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <ControlTemplate x:Key="BookCardTemplate" TargetType="Button">
+            <Border x:Name="CardBorder" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Width="160" Height="240" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <Border Grid.Row="0" CornerRadius="7,7,0,0" ClipToBounds="True" Background="{DynamicResource AppBackgroundBrush}">
+                        <Image Source="{Binding ThumbnailPath}" Stretch="Uniform" Margin="4"/>
+                    </Border>
+                    
+                    <Border Grid.Row="1" Background="{DynamicResource SurfaceBrush}" CornerRadius="0,0,7,7" Padding="12,10" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource BorderSubtleBrush}">
+                        <Grid>
+                            <TextBlock Text="{Binding FileName}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12" FontFamily="Segoe UI" TextWrapping="Wrap" MaxHeight="34" TextTrimming="CharacterEllipsis" Margin="0,0,16,0"/>
+                        </Grid>
+                    </Border>
+                    
+                    <TextBlock Text="❤️" Visibility="{Binding IsFavorite, Converter={StaticResource BoolToVis}}" Foreground="{DynamicResource DangerBrush}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8" FontSize="16">
+                        <TextBlock.Effect>
+                            <DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="0" Opacity="0.8"/>
+                        </TextBlock.Effect>
+                    </TextBlock>
+                </Grid>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="CardBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                    <Setter TargetName="CardBorder" Property="Background" Value="{DynamicResource SurfaceHoverBrush}"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="BookListTemplate" TargetType="Button">
+            <Border x:Name="CardBorder" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="6" Height="80" Margin="0,0,0,10" Padding="0" HorizontalAlignment="Stretch">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <Border Grid.Column="0" CornerRadius="5,0,0,5" ClipToBounds="True" Background="{DynamicResource AppBackgroundBrush}">
+                        <Image Source="{Binding ThumbnailPath}" Stretch="UniformToFill" Margin="2"/>
+                    </Border>
+                    
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="12,0">
+                        <TextBlock Text="{Binding FileName}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding FormattedDate}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Margin="0,4,0,0"/>
+                    </StackPanel>
+                    
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="❤️" Visibility="{Binding IsFavorite, Converter={StaticResource BoolToVis}}" Foreground="{DynamicResource DangerBrush}" VerticalAlignment="Center" FontSize="16"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="CardBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                    <Setter TargetName="CardBorder" Property="Background" Value="{DynamicResource SurfaceHoverBrush}"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <ContextMenu x:Key="BookContextMenu" Background="{DynamicResource SurfaceBrush}" Foreground="{DynamicResource TextPrimaryBrush}">
+            <MenuItem Header="📖 Buka Buku" Click="MenuBuka_Click"/>
+            <MenuItem Header="⭐️ Favoritkan/Batal" Click="MenuFavorit_Click"/>
+            <Separator Background="{DynamicResource BorderSubtleBrush}"/>
+            <MenuItem Header="✏️ Ganti Nama" Click="MenuRename_Click"/>
+            <MenuItem Header="🗑️ Hapus File" Click="MenuHapus_Click" Foreground="{DynamicResource DangerBrush}"/>
+        </ContextMenu>
+
+        <DataTemplate x:Key="BookCardDataTemplate">
+            <Button Margin="10" Cursor="Hand" Click="RecentFile_Click" Tag="{Binding FilePath}" Background="Transparent" BorderThickness="0" Template="{StaticResource BookCardTemplate}" ContextMenu="{StaticResource BookContextMenu}" HorizontalAlignment="Left"/>
+        </DataTemplate>
+        <DataTemplate x:Key="BookListDataTemplate">
+            <Button Margin="0" Cursor="Hand" Click="RecentFile_Click" Tag="{Binding FilePath}" Background="Transparent" BorderThickness="0" Template="{StaticResource BookListTemplate}" ContextMenu="{StaticResource BookContextMenu}" HorizontalAlignment="Stretch"/>
+        </DataTemplate>
+
+        <ItemsPanelTemplate x:Key="WrapPanelTemplate">
+            <WrapPanel Orientation="Horizontal" />
+        </ItemsPanelTemplate>
+        <ItemsPanelTemplate x:Key="StackPanelTemplate">
+            <StackPanel Orientation="Vertical" />
+        </ItemsPanelTemplate>
+        
+        <Style x:Key="TocTreeViewItem" TargetType="TreeViewItem">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TreeViewItem">
+                        <StackPanel>
+                            <Border x:Name="Bd" Background="Transparent" BorderThickness="0" Padding="{TemplateBinding Padding}" CornerRadius="4" Margin="2,1">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <ToggleButton x:Name="Expander" Grid.Column="0" ClickMode="Press" IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}" Width="16" Height="16" Margin="0,0,4,0" Background="Transparent" BorderBrush="Transparent" Visibility="Collapsed">
+                                        <TextBlock Text="▸" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    </ToggleButton>
+                                    <ContentPresenter x:Name="PART_Header" Grid.Column="1" ContentSource="Header" HorizontalAlignment="Left"/>
+                                </Grid>
+                            </Border>
+                            <ItemsPresenter x:Name="ItemsHost" Margin="16,0,0,0" Visibility="Collapsed"/>
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="HasItems" Value="True"><Setter TargetName="Expander" Property="Visibility" Value="Visible"/></Trigger>
+                            <Trigger Property="IsExpanded" Value="True"><Setter TargetName="ItemsHost" Property="Visibility" Value="Visible"/></Trigger>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource SurfaceHoverBrush}"/></Trigger>
+                            <Trigger Property="IsSelected" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource ButtonActiveBackgroundBrush}"/><Setter Property="Foreground" Value="White"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid x:Name="RootGrid">
+        <Grid x:Name="HomeContainer" Visibility="Visible">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,1,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Margin="20,24,20,20">
+                        <TextBlock Text="📚 Book Reader" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="18" FontWeight="SemiBold" FontFamily="Segoe UI" Margin="0,0,0,24"/>
+                        <RadioButton x:Name="MenuRecent" Content="🕒 Terakhir Dibaca" Style="{StaticResource SidebarMenuItem}" IsChecked="True" Checked="MenuHome_Checked"/>
+                        <RadioButton x:Name="MenuLibrary" Content="📖 Semua Buku" Style="{StaticResource SidebarMenuItem}" Checked="MenuHome_Checked"/>
+                        <RadioButton x:Name="MenuFolders" Content="📁 Kelola Folder" Style="{StaticResource SidebarMenuItem}" Checked="MenuHome_Checked"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" Margin="20,20,20,24">
+                        <RadioButton x:Name="MenuSettings" Content="⚙️ Pengaturan" Style="{StaticResource SidebarMenuItem}" Checked="MenuHome_Checked"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1" Background="{DynamicResource AppBackgroundBrush}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <Border Grid.Row="0" Padding="32,24,32,16">
+                        <Grid>
+                            <TextBlock x:Name="TxtHomeTitle" Text="Terakhir Dibaca" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="24" FontWeight="SemiBold" FontFamily="Segoe UI" VerticalAlignment="Center"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button x:Name="BtnAddFolder" Content="➕ Tambah Folder" Style="{StaticResource ToolbarButton}" Click="BtnAddFolder_Click" Background="{DynamicResource AccentBrush}" Foreground="White" BorderBrush="{DynamicResource AccentBrush}" Visibility="Collapsed" Margin="0,0,10,0"/>
+                                <Button x:Name="BtnScanNow" Content="🔄 Scan Ulang" Style="{StaticResource ToolbarButton}" Click="BtnScanNow_Click" Visibility="Collapsed" Margin="0,0,10,0"/>
+                                <Button x:Name="BtnBukaFileHome" Content="📂 Buka File PDF" Style="{StaticResource ToolbarButton}" Click="BtnBukaFile_Click"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <Grid Grid.Row="1">
+                        <Grid x:Name="RecentView" Visibility="Collapsed">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <Grid>
+                                    <TextBlock x:Name="TxtNoRecentFiles" Text="Belum ada buku yang pernah dibaca. Buka file PDF untuk mulai!" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
+                                    <ItemsControl x:Name="RecentFilesList" Padding="20,0,20,20" ItemTemplate="{StaticResource BookCardDataTemplate}" ItemsPanel="{StaticResource WrapPanelTemplate}" HorizontalContentAlignment="Stretch"/>
+                                </Grid>
+                            </ScrollViewer>
+                        </Grid>
+
+                        <Grid x:Name="LibraryView" Visibility="Collapsed">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <Border Grid.Row="0" Background="Transparent" Padding="32,0,32,16">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <Button x:Name="BtnSortDropdown" Content="Urutkan: A-Z (Judul) ⏷" Style="{StaticResource ToolbarButton}" Click="BtnSortDropdown_Click">
+                                            <Button.ContextMenu>
+                                                <ContextMenu Background="{DynamicResource SurfaceBrush}" Foreground="{DynamicResource TextPrimaryBrush}">
+                                                    <MenuItem Header="A-Z (Judul)" Click="SortMenuItem_Click" Tag="0"/>
+                                                    <MenuItem Header="Z-A (Judul)" Click="SortMenuItem_Click" Tag="1"/>
+                                                    <MenuItem Header="Terbaru Dibuka" Click="SortMenuItem_Click" Tag="2"/>
+                                                    <MenuItem Header="Hanya Favorit" Click="SortMenuItem_Click" Tag="3"/>
+                                                </ContextMenu>
+                                            </Button.ContextMenu>
+                                        </Button>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <RadioButton x:Name="BtnViewGrid" Content="⊞ Grid" Style="{StaticResource ViewModeButton}" IsChecked="True" Checked="BtnViewMode_Checked"/>
+                                        <RadioButton x:Name="BtnViewList" Content="𝄘 List" Style="{StaticResource ViewModeButton}" Margin="4,0,0,0" Checked="BtnViewMode_Checked"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                                <Grid>
+                                    <TextBlock x:Name="TxtNoLibraryFiles" Text="Belum ada buku di perpustakaan. Tambahkan folder koleksimu di Kelola Folder!" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
+                                    <ItemsControl x:Name="LibraryFilesList" Padding="20,0,20,20" ItemTemplate="{StaticResource BookCardDataTemplate}" ItemsPanel="{StaticResource WrapPanelTemplate}" HorizontalContentAlignment="Stretch"/>
+                                </Grid>
+                            </ScrollViewer>
+                        </Grid>
+
+                        <ScrollViewer x:Name="FoldersView" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
+                            <StackPanel Margin="32,0,32,32">
+                                <TextBlock Text="Daftar Folder Perpustakaan" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                                <TextBlock Text="Aplikasi akan memindai folder-folder ini untuk mencari file PDF secara otomatis." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" Margin="0,0,0,24"/>
+                                
+                                <ItemsControl x:Name="FoldersList">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="6" Padding="16,12" Margin="0,0,0,10">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="📁" FontSize="16" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="14" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                                    <Button Grid.Column="2" Content="Hapus" Style="{StaticResource ToolbarButton}" Tag="{Binding}" Click="BtnRemoveFolder_Click" Background="{DynamicResource SurfaceHoverBrush}"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </ScrollViewer>
+
+                        <ScrollViewer x:Name="SettingsView" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
+                            <StackPanel Margin="32,0,32,32">
+                                <TextBlock Text="Pengaturan Aplikasi" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,24"/>
+                                <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="6" Padding="16">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="Tema Visual" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                            <TextBlock Text="Pilih mode tampilan aplikasi." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13"/>
+                                        </StackPanel>
+                                        <Button x:Name="BtnThemeDropdown" Content="Dark Mode ⏷" Style="{StaticResource ToolbarButton}" Click="BtnThemeDropdown_Click" Grid.Column="1" VerticalAlignment="Center" MinWidth="120">
+                                            <Button.ContextMenu>
+                                                <ContextMenu Background="{DynamicResource SurfaceBrush}" Foreground="{DynamicResource TextPrimaryBrush}">
+                                                    <MenuItem Header="Light Mode" Click="ThemeMenuItem_Click" Tag="Light"/>
+                                                    <MenuItem Header="Dark Mode" Click="ThemeMenuItem_Click" Tag="Dark"/>
+                                                </ContextMenu>
+                                            </Button.ContextMenu>
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Grid x:Name="ReaderContainer" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1" Padding="12,8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <Button x:Name="BtnCloseBook" Content="⬅ Tutup Buku" Style="{StaticResource ToolbarButton}" Click="BtnCloseBook_Click" ToolTip="Kembali ke Rak Buku" Background="{DynamicResource SurfaceHoverBrush}"/>
+                        <Border Width="1" Background="{DynamicResource BorderSubtleBrush}" Margin="10,2" VerticalAlignment="Stretch"/>
+                        <Button x:Name="BtnToggleToc" Content="☰ Daftar Isi" Style="{StaticResource ToolbarButton}" Click="BtnToggleToc_Click" ToolTip="Toggle Daftar Isi (Ctrl+T)" IsEnabled="False"/>
+                        <Border Width="1" Background="{DynamicResource BorderSubtleBrush}" Margin="10,2" VerticalAlignment="Stretch"/>
+                        <Button x:Name="BtnBukaFileReader" Content="📂 Buka File" Style="{StaticResource ToolbarButton}" Click="BtnBukaFile_Click" ToolTip="Buka File PDF (Ctrl+O)"/>
+                        <Border Width="1" Background="{DynamicResource BorderSubtleBrush}" Margin="10,2" VerticalAlignment="Stretch"/>
+                        <Button x:Name="BtnPrevPage" Content="◀" Style="{StaticResource IconButton}" Click="BtnPrevPage_Click" IsEnabled="False"/>
+                        <Button x:Name="BtnNextPage" Content="▶" Style="{StaticResource IconButton}" Click="BtnNextPage_Click" Margin="4,0,0,0" IsEnabled="False"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock x:Name="TxtPageInfo" Text="Belum ada file" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" FontFamily="Segoe UI" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <Button x:Name="BtnZoomOut" Content="🔍−" Style="{StaticResource IconButton}" Click="BtnZoomOut_Click" IsEnabled="False"/>
+                        <TextBlock x:Name="TxtZoomLevel" Text="100%" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12" FontFamily="Segoe UI" VerticalAlignment="Center" Margin="8,0" MinWidth="40" TextAlignment="Center"/>
+                        <Button x:Name="BtnZoomIn" Content="🔍+" Style="{StaticResource IconButton}" Click="BtnZoomIn_Click" IsEnabled="False"/>
+                        <Button x:Name="BtnFitWidth" Content="↔" Style="{StaticResource IconButton}" Click="BtnFitWidth_Click" Margin="4,0,0,0" IsEnabled="False" FontFamily="Segoe UI"/>
+                        <Border Width="1" Background="{DynamicResource BorderSubtleBrush}" Margin="10,2" VerticalAlignment="Stretch"/>
+                        <ToggleButton x:Name="BtnPageModeContinuous" Content="Tunggal" Style="{StaticResource ViewModeButton}" IsChecked="True" Click="BtnPageModeContinuous_Click" IsEnabled="False"/>
+                        <ToggleButton x:Name="BtnPageModeDouble" Content="Ganda" Style="{StaticResource ViewModeButton}" Margin="4,0,0,0" Click="BtnPageModeDouble_Click" IsEnabled="False"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border x:Name="TocPanel" Grid.Column="0" Width="0" Background="{DynamicResource AppBackgroundBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,1,0" Visibility="Collapsed">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Border Grid.Row="0" Background="{DynamicResource SurfaceBrush}" Padding="12,10" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1">
+                            <Grid>
+                                <TextBlock Text="📑 Daftar Isi" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="14" FontWeight="SemiBold" FontFamily="Segoe UI" VerticalAlignment="Center"/>
+                                <Button Content="✕" HorizontalAlignment="Right" Style="{StaticResource IconButton}" Click="BtnCloseToc_Click" FontFamily="Segoe UI" FontSize="12"/>
+                            </Grid>
+                        </Border>
+                        <TreeView x:Name="TocTreeView" Grid.Row="1" Background="Transparent" BorderThickness="0" Padding="4" SelectedItemChanged="TocTreeView_SelectedItemChanged" ItemContainerStyle="{StaticResource TocTreeViewItem}">
+                            <TreeView.ItemTemplate>
+                                <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                                    <TextBlock Text="{Binding Title}" Padding="2" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="13"/>
+                                </HierarchicalDataTemplate>
+                            </TreeView.ItemTemplate>
+                        </TreeView>
+                        <TextBlock x:Name="TxtNoToc" Grid.Row="1" Text="PDF ini tidak memiliki daftar isi." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
+                    </Grid>
+                </Border>
+
+                <GridSplitter x:Name="TocSplitter" Grid.Column="1" Width="0" Background="{DynamicResource BorderSubtleBrush}" HorizontalAlignment="Center" VerticalAlignment="Stretch" Visibility="Collapsed"/>
+
+                <Border Grid.Column="2" Background="{DynamicResource AppBackgroundBrush}">
+                    <ScrollViewer x:Name="PdfScrollViewer" Background="{DynamicResource AppBackgroundBrush}" Visibility="Visible" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Grid.LayoutTransform>
+                                <ScaleTransform x:Name="PdfScaleTransform" ScaleX="1" ScaleY="1" />
+                            </Grid.LayoutTransform>
+                            <StackPanel x:Name="PageContainer" Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Border Background="White" Margin="5" x:Name="BorderLeftPage" Visibility="Collapsed">
+                                    <Image x:Name="ImgLeftPage" Stretch="None"/>
+                                </Border>
+                                <Border x:Name="BorderRightPage" Background="White" Margin="5" Visibility="Collapsed">
+                                    <Image x:Name="ImgRightPage" Stretch="None"/>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+
+            <Border Grid.Row="2" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,1,0,0" Padding="12,6">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="TxtStatus" Grid.Column="0" Text="Siap" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="TxtViewMode" Grid.Column="1" Text="Tunggal" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" Margin="16,0"/>
+                    <TextBlock x:Name="TxtZoomStatus" Grid.Column="2" Text="100%" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center"/>
+                </Grid>
+            </Border>
+        </Grid>
+        
+        <Grid x:Name="RenameOverlay" Visibility="Collapsed" Background="#80000000">
+            <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Width="400" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24">
+                <StackPanel>
+                    <TextBlock Text="Ganti Nama File" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16"/>
+                    <TextBox x:Name="TxtRenameInput" Background="{DynamicResource AppBackgroundBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" Padding="8" FontSize="14"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0">
+                        <Button Content="Batal" Style="{StaticResource ToolbarButton}" Margin="0,0,8,0" Click="BtnRenameCancel_Click"/>
+                        <Button Content="Simpan" Style="{StaticResource ToolbarButton}" Background="{DynamicResource AccentBrush}" Foreground="White" BorderBrush="{DynamicResource AccentBrush}" Click="BtnRenameSave_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

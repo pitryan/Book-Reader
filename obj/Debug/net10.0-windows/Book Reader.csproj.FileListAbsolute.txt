@@ -1,0 +1,29 @@
+D:\test\Book Reader\Book Reader\Book Reader\bin\Debug\net10.0-windows\Book Reader.exe
+D:\test\Book Reader\Book Reader\Book Reader\bin\Debug\net10.0-windows\Book Reader.deps.json
+D:\test\Book Reader\Book Reader\Book Reader\bin\Debug\net10.0-windows\Book Reader.runtimeconfig.json
+D:\test\Book Reader\Book Reader\Book Reader\bin\Debug\net10.0-windows\Book Reader.dll
+D:\test\Book Reader\Book Reader\Book Reader\bin\Debug\net10.0-windows\Book Reader.pdb
+D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\MainWindow.baml
+D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\MainWindow.g.cs
+D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\App.g.cs
+D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\Book Reader_MarkupCompile.cache
+D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\Book Reader.g.resources
+D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\Book Reader.GeneratedMSBuildEditorConfig.editorconfig
+D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\Book Reader.AssemblyInfoInputs.cache
+D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\Book Reader.AssemblyInfo.cs
+D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\Book Reader.csproj.CoreCompileInputs.cache
+D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\Book Reader.dll
+D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\refint\Book Reader.dll
+D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\Book Reader.pdb
+D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\Book Reader.genruntimeconfig.cache
+D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\ref\Book Reader.dll
+D:\test\Book Reader\Book Reader\Book Reader\bin\Debug\net10.0-windows\PdfiumViewer.dll
+D:\test\Book Reader\Book Reader\Book Reader\bin\Debug\net10.0-windows\runtimes\win-arm64\native\pdfium.dll
+D:\test\Book Reader\Book Reader\Book Reader\bin\Debug\net10.0-windows\runtimes\win-x64\native\pdfium.dll
+D:\test\Book Reader\Book Reader\Book Reader\bin\Debug\net10.0-windows\runtimes\win-x86\native\pdfium.dll
+D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\Book Reader.csproj.AssemblyReference.cache
+D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\Book Rea.4D83640E.Up2Date
+D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\Book Reader_MarkupCompile.lref
+D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\App.baml
+D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\Themes\DarkTheme.baml
+D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\Themes\LightTheme.baml
