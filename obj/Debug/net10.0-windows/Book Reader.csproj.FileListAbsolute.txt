@@ -27,3 +27,4 @@ D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\Book Reade
 D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\App.baml
 D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\Themes\DarkTheme.baml
 D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\Themes\LightTheme.baml
+D:\test\Book Reader\Book Reader\Book Reader\obj\Debug\net10.0-windows\Book Reader.sourcelink.json

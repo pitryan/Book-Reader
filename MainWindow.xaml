@@ -238,11 +238,11 @@
         </ControlTemplate>
 
         <ContextMenu x:Key="BookContextMenu">
-            <MenuItem Header="📖 Buka Buku" Click="MenuBuka_Click"/>
-            <MenuItem Header="⭐️ Favoritkan/Batal" Click="MenuFavorit_Click"/>
+            <MenuItem Header="📖 Buka Buku" Click="MenuBuka_Click" Tag="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+            <MenuItem Header="⭐️ Favoritkan/Batal" Click="MenuFavorit_Click" Tag="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
             <Separator/>
-            <MenuItem Header="✏️ Ganti Nama" Click="MenuRename_Click"/>
-            <MenuItem Header="🗑️ Hapus File" Click="MenuHapus_Click" Foreground="{DynamicResource DangerBrush}"/>
+            <MenuItem Header="✏️ Ganti Nama" Click="MenuRename_Click" Tag="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+            <MenuItem Header="🗑️ Hapus File" Click="MenuHapus_Click" Foreground="{DynamicResource DangerBrush}" Tag="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
         </ContextMenu>
 
         <ContextMenu x:Key="SortContextMenu">
