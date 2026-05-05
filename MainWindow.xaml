@@ -18,6 +18,66 @@
             <Setter Property="Padding" Value="8,4"/>
         </Style>
 
+        <!-- Override MenuItem to hide the icon/checkbox column that causes white box bug -->
+        <Style TargetType="MenuItem">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="MenuItem">
+                        <Border x:Name="MenuItemBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderThickness="0"
+                                CornerRadius="4"
+                                Margin="4,2"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter ContentSource="Header"
+                                              VerticalAlignment="Center"
+                                              HorizontalAlignment="Left"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="MenuItemBorder" Property="Background" Value="{DynamicResource ButtonActiveBackgroundBrush}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Override ContextMenu popup border (removes the white box wrapping the menu) -->
+        <Style TargetType="ContextMenu">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ContextMenu">
+                        <Border x:Name="ContextMenuBorder"
+                                Background="{DynamicResource SurfaceBrush}"
+                                BorderBrush="{DynamicResource BorderSubtleBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="4">
+                            <Border.Effect>
+                                <DropShadowEffect Color="Black" BlurRadius="12" ShadowDepth="2" Opacity="0.4"/>
+                            </Border.Effect>
+                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="ToolbarButton" TargetType="Button">
             <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
             <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
@@ -177,12 +237,24 @@
             </ControlTemplate.Triggers>
         </ControlTemplate>
 
-        <ContextMenu x:Key="BookContextMenu" Background="{DynamicResource SurfaceBrush}" Foreground="{DynamicResource TextPrimaryBrush}">
+        <ContextMenu x:Key="BookContextMenu">
             <MenuItem Header="📖 Buka Buku" Click="MenuBuka_Click"/>
             <MenuItem Header="⭐️ Favoritkan/Batal" Click="MenuFavorit_Click"/>
-            <Separator Background="{DynamicResource BorderSubtleBrush}"/>
+            <Separator/>
             <MenuItem Header="✏️ Ganti Nama" Click="MenuRename_Click"/>
             <MenuItem Header="🗑️ Hapus File" Click="MenuHapus_Click" Foreground="{DynamicResource DangerBrush}"/>
+        </ContextMenu>
+
+        <ContextMenu x:Key="SortContextMenu">
+            <MenuItem Header="A-Z (Judul)" Click="SortMenuItem_Click" Tag="0"/>
+            <MenuItem Header="Z-A (Judul)" Click="SortMenuItem_Click" Tag="1"/>
+            <MenuItem Header="Terbaru Dibuka" Click="SortMenuItem_Click" Tag="2"/>
+            <MenuItem Header="Hanya Favorit" Click="SortMenuItem_Click" Tag="3"/>
+        </ContextMenu>
+
+        <ContextMenu x:Key="ThemeContextMenu">
+            <MenuItem Header="Light Mode" Click="ThemeMenuItem_Click" Tag="Light"/>
+            <MenuItem Header="Dark Mode" Click="ThemeMenuItem_Click" Tag="Dark"/>
         </ContextMenu>
 
         <DataTemplate x:Key="BookCardDataTemplate">
@@ -300,16 +372,7 @@
                             <Border Grid.Row="0" Background="Transparent" Padding="32,0,32,16">
                                 <Grid>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                        <Button x:Name="BtnSortDropdown" Content="Urutkan: A-Z (Judul) ⏷" Style="{StaticResource ToolbarButton}" Click="BtnSortDropdown_Click">
-                                            <Button.ContextMenu>
-                                                <ContextMenu Background="{DynamicResource SurfaceBrush}" Foreground="{DynamicResource TextPrimaryBrush}">
-                                                    <MenuItem Header="A-Z (Judul)" Click="SortMenuItem_Click" Tag="0"/>
-                                                    <MenuItem Header="Z-A (Judul)" Click="SortMenuItem_Click" Tag="1"/>
-                                                    <MenuItem Header="Terbaru Dibuka" Click="SortMenuItem_Click" Tag="2"/>
-                                                    <MenuItem Header="Hanya Favorit" Click="SortMenuItem_Click" Tag="3"/>
-                                                </ContextMenu>
-                                            </Button.ContextMenu>
-                                        </Button>
+                                        <Button x:Name="BtnSortDropdown" Content="Urutkan: A-Z (Judul) ⏷" Style="{StaticResource ToolbarButton}" Click="BtnSortDropdown_Click" ContextMenu="{StaticResource SortContextMenu}"/>
                                     </StackPanel>
                                     
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -366,14 +429,7 @@
                                             <TextBlock Text="Tema Visual" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4"/>
                                             <TextBlock Text="Pilih mode tampilan aplikasi." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13"/>
                                         </StackPanel>
-                                        <Button x:Name="BtnThemeDropdown" Content="Dark Mode ⏷" Style="{StaticResource ToolbarButton}" Click="BtnThemeDropdown_Click" Grid.Column="1" VerticalAlignment="Center" MinWidth="120">
-                                            <Button.ContextMenu>
-                                                <ContextMenu Background="{DynamicResource SurfaceBrush}" Foreground="{DynamicResource TextPrimaryBrush}">
-                                                    <MenuItem Header="Light Mode" Click="ThemeMenuItem_Click" Tag="Light"/>
-                                                    <MenuItem Header="Dark Mode" Click="ThemeMenuItem_Click" Tag="Dark"/>
-                                                </ContextMenu>
-                                            </Button.ContextMenu>
-                                        </Button>
+                                        <Button x:Name="BtnThemeDropdown" Content="Dark Mode ⏷" Style="{StaticResource ToolbarButton}" Click="BtnThemeDropdown_Click" Grid.Column="1" VerticalAlignment="Center" MinWidth="120" ContextMenu="{StaticResource ThemeContextMenu}"/>
                                     </Grid>
                                 </Border>
                             </StackPanel>
